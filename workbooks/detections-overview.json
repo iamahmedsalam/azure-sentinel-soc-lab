@@ -1,0 +1,125 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "Overview"
+      },
+      "name": "text - 4"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "SecurityIncident\r\n| where TimeGenerated > ago(7d)\r\n| summarize TotalIncidents = count()",
+        "size": 1,
+        "timeContext": {
+          "durationMs": 604800000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "tiles",
+        "tileSettings": {
+          "titleContent": {},
+          "leftContent": {
+            "columnMatch": "TotalIncidents"
+          },
+          "showBorder": true,
+          "sortOrderField": 2,
+          "styleSettings": {
+            "borderStyle": "rounded",
+            "backgroundColor": "colorGray200"
+          }
+        }
+      },
+      "customWidth": "100",
+      "name": "query - 0"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "SecurityIncident\r\n| where TimeGenerated > ago(7d)\r\n| summarize count() by Severity",
+        "size": 3,
+        "timeContext": {
+          "durationMs": 604800000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "barchart",
+        "tileSettings": {
+          "titleContent": {
+            "columnMatch": "Severity",
+            "formatter": 1
+          },
+          "leftContent": {
+            "columnMatch": "count_",
+            "formatter": 12,
+            "formatOptions": {
+              "palette": "auto"
+            },
+            "numberFormat": {
+              "unit": 17,
+              "options": {
+                "maximumSignificantDigits": 3,
+                "maximumFractionDigits": 2
+              }
+            }
+          },
+          "showBorder": false
+        }
+      },
+      "name": "query - 1"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "Activity Timeline"
+      },
+      "name": "text - 5"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "SecurityIncident\r\n| where TimeGenerated > ago(7d)\r\n| summarize IncidentCount = count() by bin(TimeGenerated, 1h)\r\n| order by TimeGenerated asc",
+        "size": 0,
+        "timeContext": {
+          "durationMs": 604800000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "timechart"
+      },
+      "name": "query - 2"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "Detections by Rule"
+      },
+      "name": "text - 6"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "SecurityIncident\r\n| where TimeGenerated > ago(7d)\r\n| summarize IncidentCount = count() by Title\r\n| order by IncidentCount desc",
+        "size": 0,
+        "timeContext": {
+          "durationMs": 604800000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "categoricalbar"
+      },
+      "name": "query - 3"
+    }
+  ],
+  "fallbackResourceIds": [
+    "/subscriptions/<SUBSCRIPTION_ID>/resourcegroups/soc-lab-sentinel-rg/providers/microsoft.operationalinsights/workspaces/soc-lab-sentinel-workspace"
+  ],
+  "fromTemplateId": "sentinel-UserWorkbook",
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

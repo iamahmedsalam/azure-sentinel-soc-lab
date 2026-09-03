@@ -1,0 +1,89 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "d1470921-45d9-4fd6-a4b8-da10c9cd66d6",
+            "version": "KqlParameterItem/1.0",
+            "name": "Account",
+            "type": 1,
+            "description": "Account name to investigate (e.g. Jackal, analyst)",
+            "isRequired": true,
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "value": "analyst"
+          },
+          {
+            "id": "e18b4f5d-1a4e-445c-a5db-b69beb7cfd07",
+            "version": "KqlParameterItem/1.0",
+            "name": "Host",
+            "type": 1,
+            "description": "Host name to investigate (e.g. WIN11-SOC-Endpoint, ubuntu-soc-agent)",
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "value": "ubuntu-soc-agent"
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "parameters - 0"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## Sign-In Activity"
+      },
+      "name": "text - 1"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let WindowsSignins = Event\r\n| where EventLog == \"Security\"\r\n| where EventID == 4624\r\n| where Computer has \"{Host}\"\r\n| extend Account = extract(@\"New Logon:.*?Account Name:\\s*(\\S+)\", 1, RenderedDescription)\r\n| where Account has \"{Account}\"\r\n| project TimeGenerated, Computer, Account, EventType = \"Windows Sign-In\", Detail = RenderedDescription;\r\nlet LinuxSignins = Syslog\r\n| where ProcessName == \"sshd\"\r\n| where Computer has \"{Host}\"\r\n| where SyslogMessage has_any (\"Accepted password\", \"Failed password\")\r\n| where SyslogMessage has \"{Account}\"\r\n| extend Account = extract(@\"(?:Accepted|Failed) password for (\\S+)\", 1, SyslogMessage)\r\n| extend EventType = iff(SyslogMessage has \"Accepted\", \"Linux Sign-In (Success)\", \"Linux Sign-In (Failed)\")\r\n| project TimeGenerated, Computer, Account, EventType, Detail = SyslogMessage;\r\nunion WindowsSignins, LinuxSignins\r\n| order by TimeGenerated desc",
+        "size": 0,
+        "timeContext": {
+          "durationMs": 604800000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "name": "query - 2"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## Process Execution (Cross-Platform)"
+      },
+      "name": "text - 3"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let WindowsProcs = Event\r\n| where Source == \"Microsoft-Windows-Sysmon\"\r\n| where EventID == 1\r\n| where Computer has \"{Host}\"\r\n| where RenderedDescription has \"{Account}\"\r\n| where RenderedDescription has_any (\"powershell.exe\", \"cmd.exe\", \"certutil.exe\", \"rundll32.exe\")\r\n| extend ProcessImage = extract(@\"Image:\\s*(.+?)\\s*FileVersion:\", 1, RenderedDescription)\r\n| extend CommandLine = extract(@\"CommandLine:\\s*(.+?)\\s*CurrentDirectory:\", 1, RenderedDescription)\r\n| extend Platform = \"Windows\"\r\n| project TimeGenerated, Computer, ProcessImage, CommandLine, Platform;\r\nlet LinuxProcs = Syslog\r\n| where ProcessName == \"audispd\"\r\n| where Computer has \"{Host}\"\r\n| where SyslogMessage has \"type=SYSCALL\"\r\n| where SyslogMessage has \"success=yes\"\r\n| where SyslogMessage has_any (\"comm=\\\"nc\\\"\", \"comm=\\\"curl\\\"\", \"comm=\\\"wget\\\"\", \"comm=\\\"python3\\\"\", \"comm=\\\"bash\\\"\")\r\n| extend ProcessImage = extract(@\"exe=\"\"(.+?)\"\"\", 1, SyslogMessage)\r\n| extend CommandLine = extract(@\"comm=\"\"(\\w+)\"\"\", 1, SyslogMessage)\r\n| extend Platform = \"Linux\"\r\n| project TimeGenerated, Computer, ProcessImage, CommandLine, Platform;\r\nunion WindowsProcs, LinuxProcs\r\n| order by TimeGenerated desc",
+        "size": 0,
+        "timeContext": {
+          "durationMs": 604800000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "name": "query - 4"
+    }
+  ],
+  "fallbackResourceIds": [
+    "/subscriptions/<SUBSCRIPTION_ID>/resourcegroups/soc-lab-sentinel-rg/providers/microsoft.operationalinsights/workspaces/soc-lab-sentinel-workspace"
+  ],
+  "fromTemplateId": "sentinel-UserWorkbook",
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
