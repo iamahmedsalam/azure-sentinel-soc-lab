@@ -5,6 +5,16 @@
 > Built by [Ahmed Salam](https://iamahmedsalam.com) — AI-Augmented SOC Analyst | CompTIA Security+ | TryHackMe Top 2%
 > Companion project to [home-soc-lab](https://github.com/iamahmedsalam/home-soc-lab)
 
+<p align="center">
+  <img src="screenshots/phase-d/D3-entity-investigation-linux.png" alt="Entity Investigation Workbook - Linux" width="90%">
+</p>
+<p align="center"><em>Entity Investigation workbook, live — the same parameter-driven cross-platform union working against the Linux endpoint, powered by the auditd/Sentinel pipeline built specifically to make this possible</em></p>
+
+<p align="center">
+  <img src="screenshots/phase-d/D1-detections-overview-full.png" alt="Detections Overview Workbook" width="90%">
+</p>
+<p align="center"><em>Detections Overview workbook — incident volume, severity breakdown, and rule-level detection activity, live</em></p>
+
 ---
 
 ## 📋 Project Overview
